@@ -51,17 +51,6 @@ set(TRITON_REPO_ORGANIZATION "https://github.com/triton-inference-server" CACHE 
 set(TRITON_BACKEND_REPO_TAG "main" CACHE STRING "Tag for triton-inference-server/backend repo")
 set(TRITON_COMMON_REPO_TAG "main" CACHE STRING "Tag for triton-inference-server/common repo")
 set(TRITON_CORE_REPO_TAG "main" CACHE STRING "Tag for triton-inference-server/core repo")
-# modified for build with custom triton-inference-server core repo
-if(NOT DEFINED TRITON_CORE_REPO_URL OR TRITON_CORE_REPO_URL STREQUAL "")
-  set(TRITON_CORE_REPO_URL "${TRITON_REPO_ORGANIZATION}/core.git" CACHE STRING "Core repo URL")
-endif()
-message(STATUS "--------------------------------------------------")
-message(STATUS "[python-backend] configuration:")
-message(STATUS "  TRITON_REPO_ORGANIZATION: ${TRITON_REPO_ORGANIZATION}")
-message(STATUS "  TRITON_CORE_REPO_URL:    ${TRITON_CORE_REPO_URL}")
-message(STATUS "  TRITON_CORE_REPO_TAG:    ${TRITON_CORE_REPO_TAG}")
-message(STATUS "  TRITON_BACKEND_REPO_TAG: ${TRITON_BACKEND_REPO_TAG}")
-message(STATUS "--------------------------------------------------")
 
 if(NOT CMAKE_BUILD_TYPE)
   set(CMAKE_BUILD_TYPE Release)
@@ -86,8 +75,7 @@ FetchContent_Declare(
 )
 FetchContent_Declare(
   repo-core
-  # modified for build with custom triton-inference-server core repo
-  GIT_REPOSITORY ${TRITON_CORE_REPO_URL}
+  GIT_REPOSITORY ${TRITON_REPO_ORGANIZATION}/core.git
   GIT_TAG ${TRITON_CORE_REPO_TAG}
 )
 FetchContent_Declare(
