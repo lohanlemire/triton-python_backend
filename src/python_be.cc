@@ -352,18 +352,16 @@ ModelInstanceState::GetInputTensor(
     std::shared_ptr<std::vector<TRITONBACKEND_Response*>>& responses)
 {
   NVTX_RANGE(nvtx_, "GetInputTensor " + Name());
-  const char* input_name;
-  // Load iidx'th input name
-  RETURN_IF_ERROR(
-      TRITONBACKEND_RequestInputName(request, input_idx, &input_name));
+  
 
-  // Load iidx'th input
+  // Load iidx'th input from it's index.
   TRITONBACKEND_Input* in;
-  RETURN_IF_ERROR(TRITONBACKEND_RequestInput(request, input_name, &in));
+  RETURN_IF_ERROR(TRITONBACKEND_RequestInputByIndex(request, input_idx, &in));
 
   // Load input properties
   TRITONSERVER_DataType input_dtype;
   const int64_t* input_shape;
+  const char* input_name;
   uint32_t input_dims_count;
   uint64_t input_byte_size;
   uint32_t input_buffer_count;
