@@ -1,0 +1,39 @@
+# Multi-stage Dockerfile that replaces the Triton Python backend artifacts
+# in an existing Triton Server image with the ones built by a builder image
+# produced from Dockerfile.python-build-release.
+#
+# Usage example:
+#   1) Build the builder image:
+#        docker build -f Dockerfile.python-build-release -t triton-python-backend-build .
+#
+#   2) Build the replacement image, selecting a base Triton server image:
+#        docker build \
+#          --build-arg BUILDER_IMAGE=triton-python-backend-build \
+#          --build-arg TRITON_BASE_IMAGE=nvcr.io/nvidia/tritonserver:24.10-py3 \
+#          -f Dockerfile.replace-python-backend -t tritonserver-custom-python:24.10 .
+#
+# Notes:
+# - The builder image must contain an install tree at /opt/tritonserver
+#   with the backend installed under /opt/tritonserver/backends/python.
+# - This replacement will overwrite any existing Python backend files in the
+#   base image at /opt/tritonserver/backends/python.
+
+ARG BUILDER_IMAGE=triton-python-backend-build
+ARG TRITON_BASE_IMAGE=nvcr.io/nvidia/tritonserver:25.09-py3
+
+FROM ${BUILDER_IMAGE} AS builder
+
+FROM ${TRITON_BASE_IMAGE} AS triton_final
+
+LABEL maintainer="triton-python-backend-replacer"
+
+# Replace the Python backend directory
+RUN mkdir -p /opt/tritonserver/backends/python
+COPY --from=builder /opt/tritonserver/backends/python/ /opt/tritonserver/backends/python/
+
+# Fix permissions (best-effort)
+RUN chmod -R a+rX /opt/tritonserver/backends/python || true
+
+WORKDIR /opt/tritonserver
+
+CMD ["/bin/bash"]
